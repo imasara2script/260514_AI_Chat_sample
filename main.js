@@ -44,14 +44,28 @@ async function fetchModels() {
         // APIキーをLocalStorageに保存
         localStorage.setItem('GEMINI_KEY', apiKey);
         
-        select.innerHTML = '';
-        models.forEach(model => {
-            var opt = document.createElement('option');
-            opt.value = model.name;
-            // RPD値があれば名前に付与
-            var rpd = rpdSettings[model.name];
-            var prefix = (rpd+'').length ? `[${rpd}] ` : "";
-            opt.innerText = prefix + (model.displayName || model.name);
+        // 1. 各モデルの表示用オブジェクトを作成
+        const modelListWithLabels = models.map(model => {
+            const rpd = rpdSettings[model.name];
+            // 0を許容するため、undefined/nullチェックに変更
+            const prefix = (rpd !== undefined && rpd !== null) ? `[${rpd}] ` : "";
+            const displayName = prefix + (model.displayName || model.name);
+            return {
+                id: model.name,
+                label: displayName
+            };
+        });
+
+        // 2. 表示名（label）で名前順にソート
+        modelListWithLabels.sort((a, b) => a.label.localeCompare(b.label, 'ja', { numeric: true }));
+
+        // 3. セレクトボックスに反映
+        select.innerHTML = '<option value="">モデルを選択</option>';
+        modelListWithLabels.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.innerText = m.label;
+            
             select.appendChild(opt);
         });
     } catch (err) {
