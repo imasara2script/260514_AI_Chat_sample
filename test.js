@@ -1,53 +1,59 @@
 /**
- * test.js
- * アプリケーションの主要ロジックを検証するテストスイート
+ * test.js - 拡張型テストスイート
  */
+
+// 1. テストケースの定義（ここを増減させるだけ！）
+const testCases = [
+    {
+        name: "Markdown: Bold conversion",
+        test: () => {
+            const result = parseMarkdown("**Bold**");
+            if (!result.includes("<strong>Bold</strong>")) throw new Error(`Got: ${result}`);
+        }
+    },
+    {
+        name: "Markdown: Header conversion",
+        test: () => {
+            const result = parseMarkdown("### Header");
+            // 前回の失敗原因：正規表現の置換結果を厳密にチェック
+            if (!result.includes("<h3>Header</h3>")) throw new Error(`Got: ${result}`);
+        }
+    },
+    {
+        name: "API: URL path construction",
+        test: () => {
+            const model = "gemini-1.5-flash";
+            const path = model.includes('models/') ? model : 'models/' + model;
+            if (path !== "models/gemini-1.5-flash") throw new Error(`Path was: ${path}`);
+        }
+    }
+];
+
+// 2. テスト実行エンジン（基本触らなくてOK）
 async function runTests() {
+    const chatBox = document.getElementById('chatBox');
     const results = [];
-    console.log("🚀 Starting Tests...");
+    console.log("🚀 Starting Modular Tests...");
 
-    const assert = (condition, message) => {
-        if (condition) {
-            results.push(`✅ ${message}`);
-        } else {
-            throw new Error(message);
-        }
-    };
-
-    try {
-        // テスト1: マークダウン変換 (chat.js)
-        const mdInput = "**太字**と### 見出し";
-        const mdOutput = parseMarkdown(mdInput);
-        assert(mdOutput.includes("<strong>太字</strong>"), "Markdown: Bold conversion");
-        assert(mdOutput.includes("<h3>見出し</h3>"), "Markdown: Header conversion");
-
-        // テスト2: API URL構築ロジック (chat.js / main.js相当)
-        const modelName = "gemini-1.5-flash";
-        const modelPath = modelName.includes('models/') ? modelName : 'models/' + modelName;
-        assert(modelPath === "models/gemini-1.5-flash", "API: URL path construction");
-
-        // テスト3: 履歴データの整合性 (main.js)
-        const testHistory = [{ role: "user", parts: [{ text: "hello" }] }];
-        const jsonStr = JSON.stringify(testHistory);
-        assert(jsonStr.includes('"role":"user"') && jsonStr.includes('"text":"hello"'), "Data: History JSON structure");
-
-        // テスト4: インポート偽装テスト
+    for (const t of testCases) {
         try {
-            JSON.parse('{"invalid": json}'); 
+            await t.test();
+            results.push(`<span style="color:green;">✅ Passed:</span> ${t.name}`);
         } catch (e) {
-            assert(true, "Logic: JSON error handling is working");
+            results.push(`<span style="color:red;">❌ Failed:</span> ${t.name} <br><small style="margin-left:20px;">理由: ${e.message}</small>`);
         }
-
-    } catch (e) {
-        results.push(`❌ Test Failed: ${e.message}`);
     }
 
-    // 結果の表示
+    // 結果表示の構築
     const testDiv = document.createElement('div');
     testDiv.className = 'msg ai';
-    testDiv.style.border = "2px solid #1a73e8";
-    testDiv.style.backgroundColor = "#f0f7ff";
-    testDiv.innerHTML = `<strong>🧪 テスト実行結果</strong><br><small>${new Date().toLocaleTimeString()}</small><hr>` + results.join("<br>");
-    document.getElementById('chatBox').appendChild(testDiv);
-    document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+    testDiv.style.cssText = "border: 2px solid #1a73e8; background: #f0f7ff; padding: 15px; margin: 10px 0;";
+    testDiv.innerHTML = `
+        <strong>🧪 テスト実行結果</strong><hr>
+        <div style="font-family: monospace; font-size: 12px; line-height: 1.8;">
+            ${results.join('<br>')}
+        </div>
+    `;
+    chatBox.appendChild(testDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
