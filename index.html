@@ -23,12 +23,18 @@
         <div class="config-row">
             <label><input type="checkbox" id="useSearch" checked> Google検索を有効化</label>
         </div>
+        
+        <div class="config-row">
+            <label for="currentRpd">選択モデルのRPD:</label>
+            <input type="number" id="currentRpd" placeholder="例: 1500" style="width: 80px;">
+            <button onclick="updateCurrentModelRpd()" style="background: #34a853;">反映</button>
+        </div>
+
         <details style="margin-top: 10px; font-size: 13px; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
-            <summary>RPD（リクエスト制限）の詳細設定</summary>
+            <summary>RPD設定のJSON入出力</summary>
             <div style="margin-top: 10px;">
-                <p style="margin: 0 0 5px 0;">モデル名(ID)とRPD値をJSONで入力してください：</p>
-                <textarea id="rpdJsonArea" style="width: 100%; height: 100px; font-family: monospace;"></textarea>
-                <button onclick="saveRpdSettings()" style="margin-top: 5px; background: #34a853;">RPD設定を保存</button>
+                <textarea id="rpdJsonArea" style="width: 100%; height: 100px; font-family: monospace;" placeholder="RPD設定がJSON形式で表示・編集できます"></textarea>
+                <button onclick="saveRpdFromJson()" style="margin-top: 5px;">JSONから読み込み</button>
             </div>
         </details>
     </header>

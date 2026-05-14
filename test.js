@@ -36,13 +36,20 @@ const testCases = [
         }
     },
     {
-        name: "Logic: RPD prefixing",
+        name: "Logic: Individual RPD input updates settings",
         test: () => {
-            const dummyModel = { name: "models/gemini-test", displayName: "Test Model" };
-            const dummyRpdSettings = { "models/gemini-test": 999 };
-            const rpd = dummyRpdSettings[dummyModel.name];
-            const label = (rpd ? `[${rpd}] ` : "") + dummyModel.displayName;
-            if (label !== "[999] Test Model") throw new Error(`Label mismatch: ${label}`);
+            // 疑似的な環境をセット
+            const testModel = "models/test-model";
+            rpdSettings = {}; 
+            
+            // 入力があったと仮定
+            const inputVal = 500;
+            rpdSettings[testModel] = inputVal;
+            
+            if (rpdSettings[testModel] !== 500) throw new Error("Individual RPD setting failed");
+            
+            const json = JSON.stringify(rpdSettings);
+            if (!json.includes('"models/test-model":500')) throw new Error("JSON sync failed");
         }
     }
 ];

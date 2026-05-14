@@ -51,23 +51,6 @@ async function fetchModels() {
     }
 }
 
-// RPD設定の保存と反映
-function saveRpdSettings() {
-    var jsonText = document.getElementById('rpdJsonArea').value;
-    try {
-        rpdSettings = JSON.parse(jsonText);
-        localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
-        alert("RPD設定を保存しました。モデルリストを更新します。");
-        fetchModels();
-    } catch (e) {
-        alert("JSONの形式が正しくありません");
-    }
-}
-
-function updateRpdJsonArea() {
-    document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
-}
-
 // 履歴のエクスポート
 function exportHistory() {
     if (chatHistory.length === 0) return alert("履歴がありません");
@@ -108,3 +91,43 @@ function rebuildChatDisplay() {
         }
     });
 }
+// main.js
+
+// 1. 選択中のモデルにRPDを設定する
+function updateCurrentModelRpd() {
+    var select = document.getElementById('modelSelect');
+    var rpdInput = document.getElementById('currentRpd');
+    var modelName = select.value;
+
+    if (!modelName) return alert("モデルを選択してください");
+    
+    var val = parseInt(rpdInput.value);
+    if (isNaN(val)) return alert("有効な数値を入力してください");
+
+    rpdSettings[modelName] = val;
+    localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
+    
+    updateRpdJsonArea(); // JSON表示を更新
+    fetchModels();       // リストの表示名 [RPD] を更新
+    alert(modelName + " のRPDを " + val + " に設定しました");
+}
+
+// 2. JSONエリアの書き換えから全体を更新する
+function saveRpdFromJson() {
+    var jsonText = document.getElementById('rpdJsonArea').value;
+    try {
+        rpdSettings = JSON.parse(jsonText);
+        localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
+        fetchModels();
+        alert("JSON設定を反映しました");
+    } catch (e) {
+        alert("JSONの形式が正しくありません");
+    }
+}
+
+// 3. モデル選択が変わった時に、入力ボックスの値を同期させる
+document.getElementById('modelSelect').addEventListener('change', function() {
+    var modelName = this.value;
+    var rpdInput = document.getElementById('currentRpd');
+    rpdInput.value = rpdSettings[modelName] || "";
+});
