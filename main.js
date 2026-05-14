@@ -134,3 +134,7 @@ document.getElementById('modelSelect').addEventListener('change', function() {
     var rpdInput = document.getElementById('currentRpd');
     rpdInput.value = rpdSettings[modelName] || "";
 });
+
+function updateRpdJsonArea() {
+    document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
+}
