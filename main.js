@@ -48,11 +48,11 @@ async function fetchModels() {
         models.forEach(model => {
             var opt = document.createElement('option');
             opt.value = model.name;
-            console.log('model.name:'+model.name)
             // RPD値があれば名前に付与
             var rpd = rpdSettings[model.name];
             var prefix = rpd ? `[${rpd}] ` : "";
             opt.innerText = prefix + (model.displayName || model.name);
+            select.appendChild(opt);
         });
     } catch (err) {
         console.error("Fetch Models Error:", err);
