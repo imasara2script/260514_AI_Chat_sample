@@ -1,7 +1,15 @@
 var chatHistory = [];
 var attachedFiles = [];
 // RPD設定を管理するオブジェクト（初期値例）
-var rpdSettings = JSON.parse(localStorage.getItem('RPD_SETTINGS')) || {};
+var rpdSettings = {};
+
+try {
+    const savedRpd = localStorage.getItem('RPD_SETTINGS');
+    if (savedRpd) rpdSettings = JSON.parse(savedRpd);
+} catch (e) {
+    console.error("RPD settings parse error:", e);
+    rpdSettings = {};
+}
 
 // ページ読み込み時にLocalStorageからAPIキーを復元
 window.addEventListener('DOMContentLoaded', (event) => {
@@ -11,11 +19,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         // キーがある場合はリストを更新
         fetchModels();
     }
-    // JSONエリアがあれば初期値をセット
-    var rpdArea = document.getElementById('rpdJsonArea');
-    if (rpdArea) {
-        updateRpdJsonArea();
-    }
+    updateRpdJsonArea();
 });
 
 function handleKeyDown(e) {
