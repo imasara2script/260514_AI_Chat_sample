@@ -50,7 +50,7 @@ async function fetchModels() {
             opt.value = model.name;
             // RPD値があれば名前に付与
             var rpd = rpdSettings[model.name];
-            var prefix = rpd ? `[${rpd}] ` : "";
+            var prefix = (rpd+'').length ? `[${rpd}] ` : "";
             opt.innerText = prefix + (model.displayName || model.name);
             select.appendChild(opt);
         });
