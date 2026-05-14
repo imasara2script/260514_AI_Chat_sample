@@ -92,6 +92,12 @@ async function sendMessage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
+        
+        // 通信は成功したが、API側でエラー（400, 500等）が返った場合
+        if (!response.ok) {
+            const errorText = await response.text(); // エラーの詳細JSONを取得
+            throw new Error(errorText);
+        }
 
         var data = await response.json();
         if (data.error) throw new Error(data.error.message);
@@ -107,7 +113,13 @@ async function sendMessage() {
         // エラーの詳細（JSON全体やメッセージ）を画面に表示する
         loadingDiv.innerHTML = `<div style="color:red; font-weight:bold;">API Error Details:</div>
                                 <pre style="white-space:pre-wrap; background:#fff1f1; padding:10px; border:1px solid #ffcccc;">${error.message}</pre>`;
-        console.error("Full Error Object:", error);
+        // コンソールにはオブジェクトとして出力
+        try {
+            console.error("Full Error Object:", error);
+            console.error("Decoded Error Object:", JSON.parse(error.message));
+        } catch (e) {
+            console.error("Raw Error Message:", error.message);
+        }
     } finally {
         document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     }

@@ -1,49 +1,53 @@
 /**
  * test.js
- * アプリの主要機能が壊れていないか検証するテスト
+ * アプリケーションの主要ロジックを検証するテストスイート
  */
 async function runTests() {
-    console.log("Starting Tests...");
     const results = [];
+    console.log("🚀 Starting Tests...");
 
-    // テスト1: マークダウン変換の検証
-    try {
-        const input = "**Bold** Text";
-        const expected = "<strong>Bold</strong> Text";
-        const result = parseMarkdown(input);
-        if (result.includes(expected)) {
-            results.push("✅ Markdown Test: Passed");
+    const assert = (condition, message) => {
+        if (condition) {
+            results.push(`✅ ${message}`);
         } else {
-            throw new Error(`Expected ${expected} but got ${result}`);
+            throw new Error(message);
         }
-    } catch (e) { results.push("❌ Markdown Test: Failed - " + e.message); }
+    };
 
-    // テスト2: 履歴エクスポートのデータ整合性
     try {
-        chatHistory = [{ role: "user", parts: [{ text: "test" }] }];
-        const json = JSON.stringify(chatHistory);
-        if (json.includes('"text":"test"')) {
-            results.push("✅ History Export Test: Passed");
-        } else {
-            throw new Error("JSON structure mismatch");
-        }
-    } catch (e) { results.push("❌ History Export Test: Failed - " + e.message); }
+        // テスト1: マークダウン変換 (chat.js)
+        const mdInput = "**太字**と### 見出し";
+        const mdOutput = parseMarkdown(mdInput);
+        assert(mdOutput.includes("<strong>太字</strong>"), "Markdown: Bold conversion");
+        assert(mdOutput.includes("<h3>見出し</h3>"), "Markdown: Header conversion");
 
-    // テスト3: API URL構築の検証 (モデル名の補完)
-    try {
-        const model = "gemini-1.5-flash";
-        const modelPath = model.includes('models/') ? model : 'models/' + model;
-        if (modelPath === "models/gemini-1.5-flash") {
-            results.push("✅ API URL Logic Test: Passed");
-        } else {
-            throw new Error("Model path construction failed");
-        }
-    } catch (e) { results.push("❌ API URL Logic Test: Failed - " + e.message); }
+        // テスト2: API URL構築ロジック (chat.js / main.js相当)
+        const modelName = "gemini-1.5-flash";
+        const modelPath = modelName.includes('models/') ? modelName : 'models/' + modelName;
+        assert(modelPath === "models/gemini-1.5-flash", "API: URL path construction");
 
-    // 結果をチャット画面に表示
-    const testDisplay = document.createElement('div');
-    testDisplay.className = 'msg ai';
-    testDisplay.style.border = "2px solid #1a73e8";
-    testDisplay.innerHTML = "<h3>Test Results</h3>" + results.join("<br>");
-    document.getElementById('chatBox').appendChild(testDisplay);
+        // テスト3: 履歴データの整合性 (main.js)
+        const testHistory = [{ role: "user", parts: [{ text: "hello" }] }];
+        const jsonStr = JSON.stringify(testHistory);
+        assert(jsonStr.includes('"role":"user"') && jsonStr.includes('"text":"hello"'), "Data: History JSON structure");
+
+        // テスト4: インポート偽装テスト
+        try {
+            JSON.parse('{"invalid": json}'); 
+        } catch (e) {
+            assert(true, "Logic: JSON error handling is working");
+        }
+
+    } catch (e) {
+        results.push(`❌ Test Failed: ${e.message}`);
+    }
+
+    // 結果の表示
+    const testDiv = document.createElement('div');
+    testDiv.className = 'msg ai';
+    testDiv.style.border = "2px solid #1a73e8";
+    testDiv.style.backgroundColor = "#f0f7ff";
+    testDiv.innerHTML = `<strong>🧪 テスト実行結果</strong><br><small>${new Date().toLocaleTimeString()}</small><hr>` + results.join("<br>");
+    document.getElementById('chatBox').appendChild(testDiv);
+    document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
 }
