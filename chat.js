@@ -39,46 +39,67 @@ async function sendMessage() {
     var useSearch = document.getElementById('useSearch').checked;
     
     if (!input.value.trim() && attachedFiles.length === 0) return;
+    if (!apiKey || !model) return alert("APIキーとモデルを選択してください");
 
-    var userParts = [{ text: input.value }];
-    attachedFiles.forEach(f => userParts.push({ inline_data: { mime_type: f.mimeType, data: f.data } }));
-    
-    var userMsgDiv = appendMessage('user', input.value);
-    attachedFiles.forEach(f => { var img = document.createElement('img'); img.src = f.raw; userMsgDiv.appendChild(img); });
+    // ユーザーメッセージの表示
+    var userText = input.value;
+    var userMsgDiv = appendMessage('user', userText);
+    attachedFiles.forEach(function(f) {
+        var img = document.createElement('img');
+        img.src = f.raw;
+        userMsgDiv.appendChild(img);
+    });
+
+    // API用データ構築
+    var userParts = [{ text: userText || "画像を解析してください" }];
+    attachedFiles.forEach(function(f) {
+        userParts.push({ inline_data: { mime_type: f.mimeType, data: f.data } });
+    });
 
     input.value = '';
-    var currentFiles = [...attachedFiles];
+    var currentFiles = attachedFiles.concat();
     attachedFiles = [];
     renderPreviews();
 
-    var loadingDiv = appendMessage('ai', '...');
+    var loadingDiv = appendMessage('ai', '回答生成中...');
     
-    // リクエストボディの構築
+    // URLの組み立て (models/ が重複しないように処理)
+    var modelPath = model.includes('models/') ? model : 'models/' + model;
+    var url = 'https://generativelanguage.googleapis.com/v1beta/' + modelPath + ':generateContent?key=' + apiKey;
+
+    // リクエストボディ
     var body = {
         contents: chatHistory.concat([{ role: "user", parts: userParts }])
     };
 
-    // Google検索ツールを動的に追加
+    // Google検索ツールの設定 (最新の形式)
     if (useSearch) {
-        body.tools = [{ google_search_retrieval: {} }];
+        body.tools = [{ google_search: {} }]; 
     }
 
     try {
-        var response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${apiKey}`, {
+        var response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
+
         var data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+
         var aiText = data.candidates[0].content.parts[0].text;
-        
         loadingDiv.innerHTML = parseMarkdown(aiText);
+
+        // 履歴の更新
         chatHistory.push({ role: "user", parts: userParts });
         chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+
     } catch (error) {
         loadingDiv.innerText = "Error: " + error.message;
+        loadingDiv.style.color = "red";
+    } finally {
+        document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     }
-    document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
 }
 
 function appendMessage(role, text) {
