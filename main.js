@@ -39,6 +39,7 @@ async function fetchModels() {
 
         var data = await response.json();
         var models = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent'));
+        console.log("models",models)
 
         // APIキーをLocalStorageに保存
         localStorage.setItem('GEMINI_KEY', apiKey);
@@ -47,6 +48,7 @@ async function fetchModels() {
         models.forEach(model => {
             var opt = document.createElement('option');
             opt.value = model.name;
+            console.log('model.name:'+model.name)
             // RPD値があれば名前に付与
             var rpd = rpdSettings[model.name];
             var prefix = rpd ? `[${rpd}] ` : "";
