@@ -1,20 +1,22 @@
 var chatHistory = [];
 var attachedFiles = [];
 // RPD設定を管理するオブジェクト（初期値例）
-var rpdSettings = JSON.parse(localStorage.getItem('RPD_SETTINGS')) || {
-    "models/gemini-1.5-flash": 1500,
-    "models/gemini-1.5-pro": 50
-};
+var rpdSettings = JSON.parse(localStorage.getItem('RPD_SETTINGS')) || {};
 
 // ページ読み込み時にLocalStorageからAPIキーを復元
-window.onload = function() {
+window.addEventListener('DOMContentLoaded', (event) => {
     var savedKey = localStorage.getItem('GEMINI_KEY');
     if (savedKey) {
         document.getElementById('apiKey').value = savedKey;
-        fetchModels(); // キーがあれば自動でモデルリストを更新
+        // キーがある場合はリストを更新
+        fetchModels();
     }
-    updateRpdJsonArea();
-};
+    // JSONエリアがあれば初期値をセット
+    var rpdArea = document.getElementById('rpdJsonArea');
+    if (rpdArea) {
+        updateRpdJsonArea();
+    }
+});
 
 function handleKeyDown(e) {
     if (e.ctrlKey && e.key === 'Enter') {
@@ -47,7 +49,8 @@ async function fetchModels() {
             opt.innerText = prefix + (model.displayName || model.name);
         });
     } catch (err) {
-        console.error(err);
+        console.error("Fetch Models Error:", err);
+        alert("モデルリストの取得に失敗しました。APIキーを確認してください。");
     }
 }
 
