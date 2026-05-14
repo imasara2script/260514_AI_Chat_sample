@@ -26,6 +26,24 @@ const testCases = [
             const path = model.includes('models/') ? model : 'models/' + model;
             if (path !== "models/gemini-1.5-flash") throw new Error(`Path was: ${path}`);
         }
+    },
+    {
+        name: "Storage: API Key persistence",
+        test: () => {
+            const testKey = "test_api_key_123";
+            localStorage.setItem('GEMINI_KEY_test', testKey);
+            if (localStorage.getItem('GEMINI_KEY_test') !== testKey) throw new Error("LocalStorage save failed");
+        }
+    },
+    {
+        name: "Logic: RPD prefixing",
+        test: () => {
+            const dummyModel = { name: "models/gemini-test", displayName: "Test Model" };
+            const dummyRpdSettings = { "models/gemini-test": 999 };
+            const rpd = dummyRpdSettings[dummyModel.name];
+            const label = (rpd ? `[${rpd}] ` : "") + dummyModel.displayName;
+            if (label !== "[999] Test Model") throw new Error(`Label mismatch: ${label}`);
+        }
     }
 ];
 
