@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Search & Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+    <header>
+        <div class="config-row">
+            <input type="password" id="apiKey" placeholder="Gemini API Key">
+            <button onclick="fetchModels()">モデル更新</button>
+        </div>
+        <div class="config-row">
+            <select id="modelSelect"><option value="">モデルを選択</option></select>
+            <button onclick="exportHistory()">履歴保存(JSON)</button>
+            <button onclick="document.getElementById('importFile').click()">履歴読込</button>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importHistory(this)">
+        </div>
+        <div class="config-row">
+            <label><input type="checkbox" id="useSearch" checked> Google検索を有効化</label>
+        </div>
+    </header>
+
+    <div id="chatBox"></div>
+
+    <div class="input-area">
+        <div id="previewContainer" class="preview-container"></div>
+        <div class="text-input-wrapper">
+            <button type="button" onclick="document.getElementById('fileInput').click()" class="icon-btn">📎</button>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+            <textarea id="userInput" placeholder="Ctrl+Enterで送信..." onkeydown="handleKeyDown(event)" onpaste="handlePaste(event)"></textarea>
+            <button id="sendBtn" onclick="sendMessage()">送信</button>
+        </div>
+    </div>
+</div>
+
+<script src="main.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>
