@@ -17,6 +17,7 @@
             <select id="modelSelect"><option value="">モデルを選択</option></select>
             <button onclick="exportHistory()">履歴保存(JSON)</button>
             <button onclick="document.getElementById('importFile').click()">履歴読込</button>
+            <button onclick="runTests()" style="background:#666;">テスト実行</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importHistory(this)">
         </div>
         <div class="config-row">
@@ -39,5 +40,6 @@
 
 <script src="main.js"></script>
 <script src="chat.js"></script>
+<script src="test.js"></script>
 </body>
 </html>

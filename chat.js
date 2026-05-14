@@ -72,9 +72,18 @@ async function sendMessage() {
         contents: chatHistory.concat([{ role: "user", parts: userParts }])
     };
 
-    // Google検索ツールの設定 (最新の形式)
+    // Google検索ツールを最新の仕様に修正
     if (useSearch) {
-        body.tools = [{ google_search: {} }]; 
+        body.tools = [
+            {
+                google_search_retrieval: {
+                    dynamic_retrieval_config: {
+                        mode: "unspecified", // 自動的に検索が必要か判断
+                        dynamic_threshold: 0.06 // 検索を利用する閾値（標準的な値）
+                    }
+                }
+            }
+        ];
     }
 
     try {
@@ -95,8 +104,10 @@ async function sendMessage() {
         chatHistory.push({ role: "model", parts: [{ text: aiText }] });
 
     } catch (error) {
-        loadingDiv.innerText = "Error: " + error.message;
-        loadingDiv.style.color = "red";
+        // エラーの詳細（JSON全体やメッセージ）を画面に表示する
+        loadingDiv.innerHTML = `<div style="color:red; font-weight:bold;">API Error Details:</div>
+                                <pre style="white-space:pre-wrap; background:#fff1f1; padding:10px; border:1px solid #ffcccc;">${error.message}</pre>`;
+        console.error("Full Error Object:", error);
     } finally {
         document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     }
