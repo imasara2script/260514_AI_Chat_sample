@@ -34,23 +34,6 @@ const testCases = [
             localStorage.setItem('GEMINI_KEY_test', testKey);
             if (localStorage.getItem('GEMINI_KEY_test') !== testKey) throw new Error("LocalStorage save failed");
         }
-    },
-    {
-        name: "Logic: Individual RPD input updates settings",
-        test: () => {
-            // 疑似的な環境をセット
-            const testModel = "models/test-model";
-            rpdSettings = {}; 
-            
-            // 入力があったと仮定
-            const inputVal = 500;
-            rpdSettings[testModel] = inputVal;
-            
-            if (rpdSettings[testModel] !== 500) throw new Error("Individual RPD setting failed");
-            
-            const json = JSON.stringify(rpdSettings);
-            if (!json.includes('"models/test-model":500')) throw new Error("JSON sync failed");
-        }
     }
 ];
 

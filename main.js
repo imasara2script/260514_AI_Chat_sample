@@ -217,7 +217,7 @@ function updateSelectColor() {
 }
 
 function openAiConfigModal() {
-    document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
+    document.getElementById('rpdJsonArea').value = JSON.stringify(aiSettings, null, 2);
     document.getElementById('aiConfigModal').style.display = 'flex';
 }
 
@@ -262,7 +262,7 @@ function handleModelChange() {
     const select = document.getElementById('modelSelect');
     const searchCheck = document.getElementById('useSearch');
     const modelId = select.value;
-    const config = rpdSettings[modelId] || {};
+    const config = aiSettings[modelId] || {};
 
     // 24時間カウント表示更新
     updateUsageDisplay();
