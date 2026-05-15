@@ -9,34 +9,39 @@
 <body>
 <div class="layout">
     <header>
-        <div class="config-row">
-            <input type="password" id="apiKey" placeholder="Gemini API Key">
-            <button onclick="fetchModels()">モデル更新</button>
-        </div>
-        <div class="config-row">
-            <select id="modelSelect"><option value="">モデルを選択</option></select>
-            <button onclick="exportHistory()">履歴保存(JSON)</button>
-            <button onclick="document.getElementById('importFile').click()">履歴読込</button>
-            <button onclick="runTests()" style="background:#666;">テスト実行</button>
-            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importHistory(this)">
-        </div>
-        <div class="config-row">
-            <label><input type="checkbox" id="useSearch" checked> Google検索を有効化</label>
-        </div>
-        
-        <div class="config-row">
-            <label for="currentRpd">選択モデルのRPD:</label>
-            <input type="number" id="currentRpd" placeholder="例: 1500" style="width: 80px;">
-            <button onclick="updateCurrentModelRpd()" style="background: #34a853;">反映</button>
-        </div>
-
-        <details style="margin-top: 10px; font-size: 13px; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
-            <summary>RPD設定のJSON入出力</summary>
-            <div style="margin-top: 10px;">
-                <textarea id="rpdJsonArea" style="width: 100%; height: 100px; font-family: monospace;" placeholder="RPD設定がJSON形式で表示・編集できます"></textarea>
-                <button onclick="saveRpdFromJson()" style="margin-top: 5px;">JSONから読み込み</button>
+        <div class="config-group">
+            <label>API Key</label>
+            <div class="config-row">
+                <input type="password" id="apiKey" placeholder="Gemini API Key">
+                <button onclick="fetchModels()">更新</button>
             </div>
-        </details>
+        </div>
+        <div class="config-group">
+            <label>AI Model (RPD順)</label>
+            <select id="modelSelect"></select>
+        </div>
+        <div class="config-group">
+            <label>RPD設定</label>
+            <div class="config-row">
+                <input type="number" id="currentRpd" style="width: 70px;">
+                <button onclick="updateCurrentModelRpd()">反映</button>
+                <details style="margin-top: 10px; font-size: 13px; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
+                    <summary>RPD設定のJSON入出力</summary>
+                    <div style="margin-top: 10px;">
+                        <textarea id="rpdJsonArea" style="width: 100%; height: 100px; font-family: monospace;" placeholder="RPD設定がJSON形式で表示・編集できます"></textarea>
+                        <button onclick="saveRpdFromJson()" style="margin-top: 5px;">JSONから読み込み</button>
+                    </div>
+                </details>
+            </div>
+        </div>
+        <div class="config-group">
+            <label>履歴操作</label>
+            <div class="config-row">
+                <button onclick="exportHistory()">保存</button>
+                <button onclick="document.getElementById('importFile').click()">読込</button>
+                <button onclick="runTests()" style="background:#666;">テスト実行</button>
+            </div>
+        </div>
     </header>
 
     <div id="chatBox"></div>

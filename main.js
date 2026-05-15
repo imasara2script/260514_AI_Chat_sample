@@ -35,7 +35,7 @@ async function fetchModels() {
     if (!apiKey) return alert("APIキーを入力してください");
     try {
         var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey);
-        if (!response.ok) throw new Error("API Key invalid");
+        if (!response.ok) throw new Error("API Key invalid",response);
 
         var data = await response.json();
         var models = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent'));
@@ -47,12 +47,25 @@ async function fetchModels() {
         // 1. 各モデルの表示用オブジェクトを作成
         const modelListWithLabels = models.map(model => {
             const rpd = rpdSettings[model.name];
+            const hasRpd = (rpd !== undefined && rpd !== null);
+            const rpdVal = hasRpd ? rpd : -1; // 未設定は-1
+
+            // 背景色のクラス判定
+            let colorClass = "";
+            if (hasRpd) {
+                if (rpd === 0) colorClass = "rpd-zero";
+                else if (rpd < 100) colorClass = "rpd-low";
+                else if (rpd < 1000) colorClass = "rpd-mid";
+                else colorClass = "rpd-high";
+            }
+            
             // 0を許容するため、undefined/nullチェックに変更
-            const prefix = (rpd !== undefined && rpd !== null) ? `[${rpd}] ` : "";
-            const displayName = prefix + (model.displayName || model.name);
+            const prefix = hasRpd ? `[${rpd}] ` : "";
             return {
                 id: model.name,
-                label: displayName
+                label: prefix + (model.displayName || model.name),
+                rpd: rpdVal,
+                className: colorClass
             };
         });
 
@@ -61,13 +74,26 @@ async function fetchModels() {
 
         // 3. セレクトボックスに反映
         select.innerHTML = '<option value="">モデルを選択</option>';
+
+        let maxRpd = -1;
+        let maxRpdId = "";
+
         modelListWithLabels.forEach(m => {
             const opt = document.createElement('option');
             opt.value = m.id;
             opt.innerText = m.label;
-            
+            if (m.className) opt.className = m.className;
             select.appendChild(opt);
+
+            // 最大RPDのモデルを記録
+            if (m.rpd > maxRpd) {
+                maxRpd = m.rpd;
+                maxRpdId = m.id;
+            }
         });
+
+        if (maxRpdId){ select.value = maxRpdId; }
+        select.dispatchEvent(new Event('change'));
     } catch (err) {
         console.error("Fetch Models Error:", err);
         alert("モデルリストの取得に失敗しました。APIキーを確認してください。");

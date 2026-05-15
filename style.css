@@ -1,7 +1,24 @@
 :root { --bg: #f8f9fa; --border: #ddd; --primary: #1a73e8; --ai-msg: #f1f3f4; --user-msg: #e8f0fe; }
 body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; }
 .layout { max-width: 900px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    background: #fdfdfd;
+}
+.config-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.config-group label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+}
 .config-row { display: flex; gap: 10px; align-items: center; }
 input[type="password"], select, button { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; }
 button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
@@ -17,3 +34,12 @@ button:hover { opacity: 0.9; }
 .text-input-wrapper { display: flex; gap: 10px; align-items: flex-end; }
 textarea { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px; resize: none; min-height: 60px; }
 .icon-btn { background: #eee; color: #333; font-size: 18px; }
+
+/* RPDごとの背景色クラス */
+.rpd-zero { background-color: #e0e0e0 !important; color: #666; }    /* グレー */
+.rpd-low { background-color: #ffdae9 !important; }                 /* ピンク (<100) */
+.rpd-mid { background-color: #fff9c4 !important; }                 /* 薄い黄色 (<1000) */
+.rpd-high { background-color: #c8e6c9 !important; }                /* 緑 (>=1000) */
+select option {
+    color: black; /* OS標準の表示対策 */
+}
