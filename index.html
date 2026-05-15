@@ -16,16 +16,21 @@
                 <button onclick="fetchModels()" style="flex-shrink: 0;">更新</button>
             </div>
         </div>
-        <div class="config-group">
-            <label>AI Model (RPD順)</label>
+        <div class="config-group"><label>AI Model / Options</label>
             <select id="modelSelect"></select>
+            <div class="config-row" style="margin-top: 5px;">
+                <label style="display:flex; align-items:center; cursor:pointer; font-size:12px;">
+                    <input type="checkbox" id="useSearch" checked> Google検索を有効化
+                </label>
+            </div>
         </div>
         <div class="config-group">
-            <label>RPD設定</label>
+            <label>RPD設定 & 24h状況</label>
             <div class="config-row">
-                <input type="number" id="currentRpd" style="width: 70px;">
+                <input type="number" id="currentRpd" style="width: 60px;" placeholder="上限">
+                <span id="usageStatus" style="font-size: 11px; color: #666;">済: 0</span>
                 <button onclick="updateCurrentModelRpd()">反映</button>
-                <button onclick="openRpdModal()" style="background: #666;">JSON管理</button>
+                <button onclick="openRpdModal()" style="background: #666;">JSON</button>
             </div>
         </div>
         <div class="config-group">

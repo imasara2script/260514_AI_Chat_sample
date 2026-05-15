@@ -87,6 +87,8 @@ async function sendMessage() {
     }
 
     try {
+        recordRequest(model);
+
         var response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -107,8 +109,13 @@ async function sendMessage() {
 
         // 履歴の更新
         chatHistory.push({ role: "user", parts: userParts });
-        chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-
+        chatHistory.push({
+            role: "model",
+            parts: [{ text: aiText }],
+            usedModel: model // モデル名を記録
+        });
+        
+        appendMessage('ai', aiResponse, model);
     } catch (error) {
         // エラーの詳細（JSON全体やメッセージ）を画面に表示する
         loadingDiv.innerHTML = `<div style="color:red; font-weight:bold;">API Error Details:</div>
@@ -125,10 +132,18 @@ async function sendMessage() {
     }
 }
 
-function appendMessage(role, text) {
-    var div = document.createElement('div');
-    div.className = 'msg ' + role;
-    div.innerText = text;
-    document.getElementById('chatBox').appendChild(div);
-    return div;
+function appendMessage(role, text, modelName = "") {
+    const chatBox = document.getElementById('chatBox');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg ${role}`;
+    
+    let content = text;
+    if (role === 'ai' && modelName) {
+        // 回答の下に小さくモデル名を表示
+        content += `<div style="font-size: 10px; color: #888; margin-top: 5px; border-top: 1px dotted #ccc;">Model: ${modelName}</div>`;
+    }
+    
+    msgDiv.innerHTML = content;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }

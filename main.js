@@ -3,6 +3,9 @@ var attachedFiles = [];
 // RPD設定を管理するオブジェクト（初期値例）
 var rpdSettings = {};
 
+// リクエスト履歴の管理（モデル名: [timestamp, timestamp, ...]）
+var requestLogs = JSON.parse(localStorage.getItem('REQUEST_LOGS')) || {};
+
 try {
     const savedRpd = localStorage.getItem('RPD_SETTINGS');
     if (savedRpd) rpdSettings = JSON.parse(savedRpd);
@@ -102,12 +105,15 @@ async function fetchModels() {
                 rpdInput.value = (currentVal !== undefined && currentVal !== null) ? currentVal : "";
             }
             updateSelectColor(); // 色を更新
+            updateUsageDisplay()
         };
         
         // 初期選択状態の反映
         if (select.value) {
             select.dispatchEvent(new Event('change'));
         }
+
+        updateUsageDisplay()
     } catch (err) {
         console.error("Fetch Models Error:", err);
         alert("モデルリストの取得に失敗しました。APIキーを確認してください。");
@@ -220,4 +226,36 @@ function openRpdModal() {
 
 function closeRpdModal() {
     document.getElementById('rpdModal').style.display = 'none';
+}
+
+// 24時間以内のリクエスト数をカウントし、古いログを掃除する
+function getRequestCount(modelName) {
+    const now = Date.now();
+    const oneDayAgo = now - (24 * 60 * 60 * 1000);
+    
+    if (!requestLogs[modelName]) return 0;
+    
+    // 24時間より前のログを除外
+    requestLogs[modelName] = requestLogs[modelName].filter(ts => ts > oneDayAgo);
+    localStorage.setItem('REQUEST_LOGS', JSON.stringify(requestLogs));
+    
+    return requestLogs[modelName].length;
+}
+
+// リクエスト実行時に記録する
+function recordRequest(modelName) {
+    if (!requestLogs[modelName]) requestLogs[modelName] = [];
+    requestLogs[modelName].push(Date.now());
+    localStorage.setItem('REQUEST_LOGS', JSON.stringify(requestLogs));
+    updateUsageDisplay(); // 表示を更新
+}
+
+// UI上の使用状況表示を更新
+function updateUsageDisplay() {
+    const select = document.getElementById('modelSelect');
+    const status = document.getElementById('usageStatus');
+    if (!select || !status) return;
+    
+    const count = getRequestCount(select.value);
+    status.innerText = `済: ${count}`;
 }
