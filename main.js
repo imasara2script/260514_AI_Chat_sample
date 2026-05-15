@@ -1,27 +1,11 @@
 var chatHistory = [];
 var attachedFiles = [];
-var aiSettings = JSON.parse(localStorage.getItem('RPD_SETTINGS')) || {
-    "models/gemini-1.5-flash": { "rpd": 1500, "search": true },
-    "models/gemini-1.5-pro": { "rpd": 50, "search": true }
-};
-
-// リクエスト履歴の管理（モデル名: [timestamp, timestamp, ...]）
-var requestLogs = JSON.parse(localStorage.getItem('REQUEST_LOGS')) || {};
-
-try {
-    const savedRpd = localStorage.getItem('RPD_SETTINGS');
-    if (savedRpd) aiSettings = JSON.parse(savedRpd);
-} catch (e) {
-    console.error("RPD settings parse error:", e);
-    aiSettings = {};
-}
 
 // ページ読み込み時にLocalStorageからAPIキーを復元
 window.addEventListener('DOMContentLoaded', (event) => {
     var savedKey = localStorage.getItem('GEMINI_KEY');
     if (savedKey) {
         document.getElementById('apiKey').value = savedKey;
-        // キーがある場合はリストを更新
         fetchModels();
     }
     updateRpdJsonArea();
@@ -44,7 +28,6 @@ async function fetchModels() {
 
         var data = await response.json();
         var models = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent'));
-        console.log("models",models)
 
         // 1. 各モデルの表示用オブジェクトを作成
         const modelListWithLabels = models.map(model => {
@@ -154,7 +137,6 @@ function rebuildChatDisplay() {
         }
     });
 }
-// main.js
 
 // 1. 選択中のモデルにRPDを設定する
 function updateCurrentModelRpd() {
@@ -217,34 +199,28 @@ function updateSelectColor() {
 }
 
 function openAiConfigModal() {
+    const select = document.getElementById('modelSelect');
+    const config = aiSettings[select.value] || { rpd: 0, search: false };
+    
+    document.getElementById('editRpd').value = config.rpd;
+    document.getElementById('editSearch').checked = config.search;
     document.getElementById('rpdJsonArea').value = JSON.stringify(aiSettings, null, 2);
     document.getElementById('aiConfigModal').style.display = 'flex';
 }
 
+function applyIndividualSetting() {
+    const select = document.getElementById('modelSelect');
+    if(!select.value) return alert("モデルを選択してください");
+    
+    aiSettings[select.value] = {
+        rpd: parseInt(document.getElementById('editRpd').value) || 0,
+        search: document.getElementById('editSearch').checked
+    };
+    document.getElementById('rpdJsonArea').value = JSON.stringify(aiSettings, null, 2);
+}
+
 function closeAiConfigModal() {
     document.getElementById('aiConfigModal').style.display = 'none';
-}
-
-// 24時間以内のリクエスト数をカウントし、古いログを掃除する
-function getRequestCount(modelName) {
-    const now = Date.now();
-    const oneDayAgo = now - (24 * 60 * 60 * 1000);
-    
-    if (!requestLogs[modelName]) return 0;
-    
-    // 24時間より前のログを除外
-    requestLogs[modelName] = requestLogs[modelName].filter(ts => ts > oneDayAgo);
-    localStorage.setItem('REQUEST_LOGS', JSON.stringify(requestLogs));
-    
-    return requestLogs[modelName].length;
-}
-
-// リクエスト実行時に記録する
-function recordRequest(modelName) {
-    if (!requestLogs[modelName]) requestLogs[modelName] = [];
-    requestLogs[modelName].push(Date.now());
-    localStorage.setItem('REQUEST_LOGS', JSON.stringify(requestLogs));
-    updateUsageDisplay(); // 表示を更新
 }
 
 // UI上の使用状況表示を更新
