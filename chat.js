@@ -146,4 +146,5 @@ function appendMessage(role, text, modelName = "") {
     msgDiv.innerHTML = content;
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+    return msgDiv
 }

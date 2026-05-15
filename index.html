@@ -10,35 +10,20 @@
 <div class="layout">
     <header>
         <div class="config-group">
-            <label>API Key</label>
+            <label>AI Model / Options</label>
             <div class="config-row">
-                <input type="password" id="apiKey" style="flex: 1; min-width: 0;" placeholder="Gemini API Key">
-                <button onclick="fetchModels()" style="flex-shrink: 0;">更新</button>
-            </div>
-        </div>
-        <div class="config-group"><label>AI Model / Options</label>
-            <select id="modelSelect"></select>
-            <div class="config-row" style="margin-top: 5px;">
+                <select id="modelSelect"></select>
                 <label style="display:flex; align-items:center; cursor:pointer; font-size:12px;">
-                    <input type="checkbox" id="useSearch" checked> Google検索を有効化
+                    <input type="checkbox" id="useSearch"> Google検索
                 </label>
             </div>
         </div>
         <div class="config-group">
-            <label>RPD設定 & 24h状況</label>
+            <label>Status & Config</label>
             <div class="config-row">
-                <input type="number" id="currentRpd" style="width: 60px;" placeholder="上限">
                 <span id="usageStatus" style="font-size: 11px; color: #666;">済: 0</span>
-                <button onclick="updateCurrentModelRpd()">反映</button>
-                <button onclick="openRpdModal()" style="background: #666;">JSON</button>
-            </div>
-        </div>
-        <div class="config-group">
-            <label>履歴操作</label>
-            <div class="config-row">
-                <button onclick="exportHistory()">保存</button>
-                <button onclick="document.getElementById('importFile').click()">読込</button>
-                <button onclick="runTests()" style="background:#666;">テスト実行</button>
+                <button onclick="openAiConfigModal()" style="background: #1a73e8;">AI関連設定</button>
+                <button onclick="exportHistory()">履歴保存</button>
             </div>
         </div>
     </header>
@@ -55,13 +40,23 @@
         </div>
     </div>
 
-    <div id="rpdModal" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
-            <h3>RPD設定 (JSON)</h3>
-            <textarea id="rpdJsonArea" style="width: 100%; height: 200px; font-family: monospace;"></textarea>
+    <div id="aiConfigModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3>AI関連設定</h3>
+            <div class="config-group" style="margin-bottom:15px;">
+                <label>API Key</label>
+                <input type="password" id="apiKey" style="width:100%;" placeholder="Gemini API Key">
+            </div>
+            
+            <div class="config-group">
+                <label>モデル毎のRPDと検索対応設定 (JSON)</label>
+                <textarea id="rpdJsonArea" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;"></textarea>
+                <p style="font-size: 11px; color: #666;">形式: { "モデル名": { "rpd": 1500, "search": true } }</p>
+            </div>
+
             <div class="modal-buttons">
-                <button onclick="saveRpdFromJson()">保存して反映</button>
-                <button onclick="closeRpdModal()" style="background: #ccc; color: black;">キャンセル</button>
+                <button onclick="saveAiConfig()">保存して反映</button>
+                <button onclick="closeAiConfigModal()" style="background: #ccc; color: black;">閉じる</button>
             </div>
         </div>
     </div>

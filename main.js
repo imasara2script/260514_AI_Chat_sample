@@ -1,17 +1,19 @@
 var chatHistory = [];
 var attachedFiles = [];
-// RPD設定を管理するオブジェクト（初期値例）
-var rpdSettings = {};
+var aiSettings = JSON.parse(localStorage.getItem('RPD_SETTINGS')) || {
+    "models/gemini-1.5-flash": { "rpd": 1500, "search": true },
+    "models/gemini-1.5-pro": { "rpd": 50, "search": true }
+};
 
 // リクエスト履歴の管理（モデル名: [timestamp, timestamp, ...]）
 var requestLogs = JSON.parse(localStorage.getItem('REQUEST_LOGS')) || {};
 
 try {
     const savedRpd = localStorage.getItem('RPD_SETTINGS');
-    if (savedRpd) rpdSettings = JSON.parse(savedRpd);
+    if (savedRpd) aiSettings = JSON.parse(savedRpd);
 } catch (e) {
     console.error("RPD settings parse error:", e);
-    rpdSettings = {};
+    aiSettings = {};
 }
 
 // ページ読み込み時にLocalStorageからAPIキーを復元
@@ -44,12 +46,10 @@ async function fetchModels() {
         var models = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent'));
         console.log("models",models)
 
-        // APIキーをLocalStorageに保存
-        localStorage.setItem('GEMINI_KEY', apiKey);
-        
         // 1. 各モデルの表示用オブジェクトを作成
         const modelListWithLabels = models.map(model => {
-            const rpd = rpdSettings[model.name];
+            const config = aiSettings[model.name] || {};
+            const rpd = config.rpd;
             const hasRpd = (rpd !== undefined && rpd !== null);
             const rpdVal = hasRpd ? rpd : -1; // 未設定は-1
 
@@ -99,13 +99,7 @@ async function fetchModels() {
         
         // RPD入力欄との連動および色の更新
         select.onchange = () => {
-            const rpdInput = document.getElementById('currentRpd');
-            if (rpdInput) {
-                const currentVal = rpdSettings[select.value];
-                rpdInput.value = (currentVal !== undefined && currentVal !== null) ? currentVal : "";
-            }
-            updateSelectColor(); // 色を更新
-            updateUsageDisplay()
+            handleModelChange()
         };
         
         // 初期選択状態の反映
@@ -173,8 +167,8 @@ function updateCurrentModelRpd() {
     var val = parseInt(rpdInput.value);
     if (isNaN(val)) return alert("有効な数値を入力してください");
 
-    rpdSettings[modelName] = val;
-    localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
+    aiSettings[modelName] = val;
+    localStorage.setItem('RPD_SETTINGS', JSON.stringify(aiSettings));
     
     updateRpdJsonArea(); // JSON表示を更新
     fetchModels();       // リストの表示名 [RPD] を更新
@@ -182,13 +176,16 @@ function updateCurrentModelRpd() {
 }
 
 // 2. JSONエリアの書き換えから全体を更新する
-function saveRpdFromJson() {
+async function saveAiConfig() {
+    var apiKey = document.getElementById('apiKey').value.trim();
     const area = document.getElementById('rpdJsonArea');
     try {
-        rpdSettings = JSON.parse(area.value);
-        localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
-        fetchModels();
-        closeRpdModal(); // 閉じる
+        aiSettings = JSON.parse(area.value);
+        localStorage.setItem('GEMINI_KEY', apiKey);
+        localStorage.setItem('RPD_SETTINGS', JSON.stringify(aiSettings));
+
+        await fetchModels();
+        closeAiConfigModal(); // 閉じる
     } catch (e) {
         alert("JSONの形式が正しくありません");
     }
@@ -198,11 +195,11 @@ function saveRpdFromJson() {
 document.getElementById('modelSelect').addEventListener('change', function() {
     var modelName = this.value;
     var rpdInput = document.getElementById('currentRpd');
-    rpdInput.value = rpdSettings[modelName] || "";
+    rpdInput.value = aiSettings[modelName] || "";
 });
 
 function updateRpdJsonArea() {
-    document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
+    document.getElementById('rpdJsonArea').value = JSON.stringify(aiSettings, null, 2);
 }
 
 // 選択中のモデルに応じて、select要素自体の背景色を更新する関数
@@ -219,13 +216,13 @@ function updateSelectColor() {
     }
 }
 
-function openRpdModal() {
-    updateRpdJsonArea(); // 最新の状態を反映
-    document.getElementById('rpdModal').style.display = 'flex';
+function openAiConfigModal() {
+    document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
+    document.getElementById('aiConfigModal').style.display = 'flex';
 }
 
-function closeRpdModal() {
-    document.getElementById('rpdModal').style.display = 'none';
+function closeAiConfigModal() {
+    document.getElementById('aiConfigModal').style.display = 'none';
 }
 
 // 24時間以内のリクエスト数をカウントし、古いログを掃除する
@@ -258,4 +255,27 @@ function updateUsageDisplay() {
     
     const count = getRequestCount(select.value);
     status.innerText = `済: ${count}`;
+}
+
+// モデル選択時の挙動
+function handleModelChange() {
+    const select = document.getElementById('modelSelect');
+    const searchCheck = document.getElementById('useSearch');
+    const modelId = select.value;
+    const config = rpdSettings[modelId] || {};
+
+    // 24時間カウント表示更新
+    updateUsageDisplay();
+
+    // Google検索の制御
+    if (config.search === true) {
+        searchCheck.disabled = false;
+        // 前回チェックしていたなら維持、そうでなければ任意
+    } else {
+        searchCheck.checked = false;
+        searchCheck.disabled = true;
+    }
+    
+    // 閉じている時の背景色反映
+    updateSelectColor();
 }
