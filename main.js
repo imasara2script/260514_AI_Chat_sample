@@ -93,7 +93,21 @@ async function fetchModels() {
         });
 
         if (maxRpdId){ select.value = maxRpdId; }
-        select.dispatchEvent(new Event('change'));
+        
+        // RPD入力欄との連動および色の更新
+        select.onchange = () => {
+            const rpdInput = document.getElementById('currentRpd');
+            if (rpdInput) {
+                const currentVal = rpdSettings[select.value];
+                rpdInput.value = (currentVal !== undefined && currentVal !== null) ? currentVal : "";
+            }
+            updateSelectColor(); // 色を更新
+        };
+        
+        // 初期選択状態の反映
+        if (select.value) {
+            select.dispatchEvent(new Event('change'));
+        }
     } catch (err) {
         console.error("Fetch Models Error:", err);
         alert("モデルリストの取得に失敗しました。APIキーを確認してください。");
@@ -183,4 +197,18 @@ document.getElementById('modelSelect').addEventListener('change', function() {
 
 function updateRpdJsonArea() {
     document.getElementById('rpdJsonArea').value = JSON.stringify(rpdSettings, null, 2);
+}
+
+// 選択中のモデルに応じて、select要素自体の背景色を更新する関数
+function updateSelectColor() {
+    const select = document.getElementById('modelSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    // 一旦全ての背景色クラスを削除
+    select.classList.remove('rpd-zero', 'rpd-low', 'rpd-mid', 'rpd-high');
+    
+    // 選択されたoptionのクラスをselect本体にコピー
+    if (selectedOption && selectedOption.className) {
+        select.classList.add(selectedOption.className);
+    }
 }

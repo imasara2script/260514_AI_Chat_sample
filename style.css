@@ -13,13 +13,19 @@ header {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 200px; /* 最小幅を確保して重なりを防止 */
 }
 .config-group label {
     font-size: 12px;
     font-weight: bold;
     color: #666;
 }
-.config-row { display: flex; gap: 10px; align-items: center; }
+.config-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: nowrap; /* 折り返しを禁止してボタンを横に並べる */
+}
 input[type="password"], select, button { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; }
 button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
 button:hover { opacity: 0.9; }
@@ -35,11 +41,27 @@ button:hover { opacity: 0.9; }
 textarea { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px; resize: none; min-height: 60px; }
 .icon-btn { background: #eee; color: #333; font-size: 18px; }
 
-/* RPDごとの背景色クラス */
-.rpd-zero { background-color: #e0e0e0 !important; color: #666; }    /* グレー */
-.rpd-low { background-color: #ffdae9 !important; }                 /* ピンク (<100) */
-.rpd-mid { background-color: #fff9c4 !important; }                 /* 薄い黄色 (<1000) */
-.rpd-high { background-color: #c8e6c9 !important; }                /* 緑 (>=1000) */
+/* select要素自体の背景色設定（クラスによって切り替え） */
+select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+    transition: background-color 0.3s; /* 色の変化を滑らかに */
+}
+
+/* 閉じている状態（select本体）への適用 */
+select.rpd-zero { background-color: #e0e0e0 !important; color: #666; }
+select.rpd-low  { background-color: #ffdae9 !important; }
+select.rpd-mid  { background-color: #fff9c4 !important; }
+select.rpd-high { background-color: #c8e6c9 !important; }
+
+/* 展開時（option）への適用 */
+option.rpd-zero { background-color: #e0e0e0; color: #666; }
+option.rpd-low  { background-color: #ffdae9; }
+option.rpd-mid  { background-color: #fff9c4; }
+option.rpd-high { background-color: #c8e6c9; }
+
 select option {
     color: black; /* OS標準の表示対策 */
 }
