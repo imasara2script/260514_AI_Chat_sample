@@ -51,7 +51,7 @@ async function fetchModels() {
             const rpdVal = hasRpd ? rpd : -1; // 未設定は-1
 
             // 背景色のクラス判定
-            let colorClass = "";
+            let colorClass = "rpd-none";
             if (hasRpd) {
                 if (rpd === 0) colorClass = "rpd-zero";
                 else if (rpd < 100) colorClass = "rpd-low";
@@ -177,12 +177,12 @@ function updateCurrentModelRpd() {
 
 // 2. JSONエリアの書き換えから全体を更新する
 function saveRpdFromJson() {
-    var jsonText = document.getElementById('rpdJsonArea').value;
+    const area = document.getElementById('rpdJsonArea');
     try {
-        rpdSettings = JSON.parse(jsonText);
+        rpdSettings = JSON.parse(area.value);
         localStorage.setItem('RPD_SETTINGS', JSON.stringify(rpdSettings));
         fetchModels();
-        alert("JSON設定を反映しました");
+        closeRpdModal(); // 閉じる
     } catch (e) {
         alert("JSONの形式が正しくありません");
     }
@@ -211,4 +211,13 @@ function updateSelectColor() {
     if (selectedOption && selectedOption.className) {
         select.classList.add(selectedOption.className);
     }
+}
+
+function openRpdModal() {
+    updateRpdJsonArea(); // 最新の状態を反映
+    document.getElementById('rpdModal').style.display = 'flex';
+}
+
+function closeRpdModal() {
+    document.getElementById('rpdModal').style.display = 'none';
 }
